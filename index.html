@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>こどもじんろう</title>
+<style>
+:root{--bg:#dff3d4;--card:#fffdf5;--ink:#26382a;--sub:#566b59;--main:#2f8a54;--mi:#fff;--line:#b9d9ac;--hi:#ffe9a8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#16261b;--card:#213629;--ink:#ecf6e8;--sub:#a9c2ab;--main:#46b878;--mi:#0a2514;--line:#34523c;--hi:#4a4a22}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#16261b;--card:#213629;--ink:#ecf6e8;--sub:#a9c2ab;--main:#46b878;--mi:#0a2514;--line:#34523c;--hi:#4a4a22}
+body.night{--bg:#1a1c3e;--card:#2a2d5c;--ink:#f1efff;--sub:#b9b7e6;--main:#ffd166;--mi:#2a2410;--line:#444889;--hi:#4b4f9a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic","Meiryo",sans-serif;font-size:18px;line-height:1.6;transition:background .5s,color .5s}
+#app{max-width:520px;margin:0 auto;padding:20px 16px 18vh;box-sizing:border-box;display:flex;flex-direction:column;min-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+#app>*:not(.btn)+.btn{margin-top:auto}
+#app.p0{padding-bottom:14vh}
+#app.p1{padding-bottom:calc(14vh + 100px)}
+#app>*:not(.btn):has(+.btn){margin-bottom:28px}
+h1{font-size:1.9rem;text-align:center;margin:.3em 0}
+h2{font-size:1.4rem;text-align:center;margin:.3em 0}
+p{text-align:center;margin:.5em 0}
+.sub{color:var(--sub);font-size:.95rem}
+.subt{font-size:1.25rem;font-weight:700;color:var(--main);margin:-.2em 0 .6em}
+.big{font-size:3.6rem;text-align:center;line-height:1.2;margin-top:.4em}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:10px 14px;margin:14px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;margin-right:7px;vertical-align:-2px;border:2px solid rgba(255,255,255,.7);box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.btn{display:block;width:100%;margin:10px 0;padding:16px;font:inherit;font-size:1.2rem;font-weight:700;border:0;border-radius:16px;background:var(--main);color:var(--mi);cursor:pointer}
+.btn.sub{background:transparent;color:var(--ink);border:2px solid var(--line);font-weight:400}
+.btn:disabled{opacity:.35;cursor:default}
+.btn:focus-visible,.pl:focus-visible,.rb:focus-visible,input:focus-visible{outline:3px solid var(--main);outline-offset:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.pl{font:inherit;font-size:1.1rem;padding:16px 8px;border-radius:14px;border:3px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.pl.on{border-color:var(--main);background:var(--hi);font-weight:700}
+.cnt{display:flex;align-items:center;gap:14px;font-size:1.3rem}
+.rb{width:44px;height:44px;border-radius:50%;border:2px solid var(--main);background:var(--card);color:var(--ink);font-size:1.4rem;cursor:pointer}
+.nm{display:flex;align-items:center;margin:8px 0}
+.nm input{flex:1;font:inherit;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+.timer{font-size:3rem;font-weight:700;text-align:center;margin:10px 0}
+.res{font-size:1.3rem;background:var(--hi);border-radius:14px;padding:12px}
+.slot{position:relative;height:180px;overflow:hidden;border-radius:18px;background:var(--card);box-shadow:0 0 0 3px var(--line);margin:20px 3px}
+.strip{will-change:transform}
+.it{height:60px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;white-space:nowrap}
+.band{position:absolute;left:0;right:0;top:60px;height:60px;box-sizing:border-box;border-top:3px solid var(--main);border-bottom:3px solid var(--main);background:var(--hi);opacity:.45;pointer-events:none}
+.fade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(var(--card),transparent 33%,transparent 67%,var(--card))}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0 10px}
+.chip{background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.9rem}
+.plist{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin:6px 0 10px}
+.gone{opacity:.45;text-decoration:line-through}
+.gone small{display:inline-block;margin-left:4px;font-size:.7rem;text-decoration:none}
+.rw{padding:14px;text-align:center;font-size:1.2rem;min-height:1.6em;opacity:.35}
+.rw.mid{opacity:1;font-size:1.7rem;font-weight:700;background:var(--hi);border-top:3px solid var(--main);border-bottom:3px solid var(--main)}
+@media (prefers-reduced-motion:reduce){body{transition:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const COLORS=[["あか","#e74c3c"],["あお","#3b82f6"],["きいろ","#f1c40f"],["みどり","#27ae60"],["オレンジ","#f39c12"],["むらさき","#9b59b6"],["ちゃいろ","#8d6e63"],["ピンク","#ff7eb6"]];
+const ROLES={
+liar:{n:"うそつきオオカミ",e:"🐺",d:"よるにひとりを、たべるよ。ひるは、なかまのふりをして、うまくごまかしてね。"},
+owl:{n:"ものしりフクロウ",e:"🦉",d:"はじめに、うそつきじゃない人を ひとり おしえてもらえるよ。よるには ひとりを えらんで、うそつきオオカミか どうか しらべられるよ。"},
+dog:{n:"まもりイヌ",e:"🐶",d:"よるにひとりをまもるよ。まもられた人は、たべられないよ。"},
+rabbit:{n:"なかよしウサギ",e:"🐰",d:"とくべつな力は ないよ。はなしあいと とうひょうで、うそつきオオカミを 見つけてね！"}};
+const PLACES=[["🌳","大きな木",["どんぐり","きれいな はっぱ","ふわふわの はね"]],["🌊","川",["ツルツルの 石","小さな さかな","キラキラの 水"]],["🌿","草のなか",["よつばの クローバー","てんとうむし","あまい きのみ"]],["🌸","花ばたけ",["きれいな 花","ちょうちょ","あまい みつ"]]];
+const app=document.getElementById("app");
+const S={n:5,names:[],roles:[],out:[],nt:false};
+const esc=s=>s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dot=i=>`<span class="dot" style="background:${COLORS[i][1]}"></span>`;
+const pn=i=>dot(i)+esc(S.names[i]);
+const alive=()=>[...Array(S.n).keys()].filter(i=>!S.out[i]);
+function render(h,night,keep){if(!keep)S.pos=1-(S.pos||0);app.className="p"+S.pos;S.nt=!!night;document.body.classList.toggle("night",S.nt);app.innerHTML=h;window.scrollTo(0,0)}
+function winner(){const a=alive(),l=a.filter(i=>S.roles[i]==="liar").length;if(!l)return"rabbit";if(l>=a.length-l)return"liar";return null}
+function readNames(){app.querySelectorAll("input[data-i]").forEach(e=>{S.names[+e.dataset.i]=e.value.trim()||COLORS[+e.dataset.i][0]})}
+function handover(i,msg,cb,night){S.cb=cb;render(`<div class="big">📱</div><h2>${pn(i)} に わたしてね</h2><p class="sub">${msg}</p><button class="btn" data-a="go">わたされたよ！</button>`,night)}
+function choose(i,head,cands,ok,night,lab){S.ch={i,head,cands,ok,sel:null,night,lab};drawChoose()}
+function drawChoose(keep){const c=S.ch;render(`${c.head}<div class="grid">${c.cands.map(j=>`<button class="pl${c.sel===j?" on":""}" data-a="sel" data-v="${j}">${c.lab?c.lab(j):pn(j)}</button>`).join("")}</div><button class="btn" data-a="ok" ${c.sel===null?"disabled":""}>${c.lab?"ここにする":"この人にする"}</button>`,c.night,keep)}
+
+function setup(){
+ while(S.names.length<8)S.names.push(COLORS[S.names.length][0]);
+ render(`<div class="big">🌲🐺🦉🐶🐰🌲</div><h1>こどもじんろう</h1><p class="subt">うそつきを見つけだせ</p>
+ <p class="sub">森のどうぶつの 中に、うそつきオオカミが まぎれているよ。はなしあって、見つけだそう！</p>
+ <div class="card"><div class="row"><b>にんずう</b><span class="cnt"><button class="rb" data-a="dec" aria-label="へらす">−</button><b>${S.n}</b><button class="rb" data-a="inc" aria-label="ふやす">＋</button></span></div>
+ ${S.names.slice(0,S.n).map((nm,i)=>`<div class="nm">${dot(i)}<input maxlength="8" value="${esc(nm)}" data-i="${i}" aria-label="${i+1}ばんめの なまえ"></div>`).join("")}</div>
+ <button class="btn" data-a="start">はじめる</button><button class="btn sub" data-a="rules">あそびかた</button>`);
+}
+function rules(){render(`<h1>あそびかた</h1><div class="card">
+<p>🐺 うそつきオオカミは、みんなに ばれないように だまします。</p>
+<p>🌙 よるは、ひとりずつ スマホ（タブレット）を うけとって、じぶんの ばんに そうさします。</p>
+<p>☀️ あさは、だれが たべられたか みんなで 見ます。</p>
+<p>💬 はなしあって、うそつきだと おもう人に とうひょう。いちばん おおい人は おうちに かえります。ひょうが おなじときは、けっせん とうひょうを します。</p>
+<p>🏆 うそつきオオカミを おうちに かえしたら なかまの かち。うそつきが なかまと おなじかず まで ふえたら うそつきの かち。</p>
+<p class="sub">ほかの人の がめんは 見ないでね！</p></div>
+<button class="btn" data-a="top">もどる</button>`)}
+function startGame(){
+ readNames();
+ const r=["liar","owl"];if(S.n>=6)r.push("dog");while(r.length<S.n)r.push("rabbit");
+ for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}
+ S.roles=r;S.out=[];S.why=[];S.day=1;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];reveal(0);
+}
+function reveal(k){
+ if(k>=S.n)return dayIntro();
+ handover(k,"ほかの人は 見ないでね！",()=>{S.k=k;render(`<div class="big">🤫</div><h2>${pn(k)}</h2><p class="sub">じぶんの やくわりを 見るよ</p><button class="btn" data-a="peek">タップして 見る</button>`)});
+}
+function night(){
+ S.acts={};S.q=alive();S.qi=0;
+ render(`<div class="big">🌙</div><h1>${S.day}日目の よる</h1><p>みんな、目を とじてね。<br>ひとりずつ スマホ（タブレット）を うけとって、じぶんの ばんに えらぼう。</p><button class="btn" data-a="turn">はじめる</button>`,true);
+}
+function nextTurn(){
+ if(S.qi>=S.q.length)return dawn();
+ const i=S.q[S.qi];
+ handover(i,"よるの ばんだよ",()=>turn(i),true);
+}
+function turn(i){
+ const role=S.roles[i];
+ const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:"もりを たんけん！<br>いく ばしょを えらんでね"}[role];
+ const rb=role==="rabbit",cands=rb?[0,1,2,3]:alive().filter(j=>role==="dog"||j!==i);
+ choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>`,cands,j=>{
+  if(role==="liar")S.acts.kill=j;
+  if(role==="dog")S.acts.guard=j;
+  const f=rb?PLACES[j]:null,res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${f[2][Math.floor(Math.random()*3)]}</b> を 見つけたよ！</p>`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 うそつきオオカミだ！":"✨ うそつきじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
+  render(`<h2>${pn(i)}</h2>${res}<button class="btn" data-a="done">かくして つぎの人へ</button>`,true);
+ },true,rb?j=>PLACES[j][0]+" "+PLACES[j][1]:null);
+}
+function dawn(){render(`<div class="big">🌙</div><h1>よるが おわったよ</h1><p>みんなで がめんを 見てね。<br>あさに なっても いいかな？</p><button class="btn" data-a="morning">あさを むかえる</button>`,true)}
+function morning(){
+ const{kill,guard}=S.acts;let msg;
+ if(kill===guard||kill===undefined)msg="ゆうべは、だれも たべられなかったよ。";
+ else{S.out[kill]=true;S.why[kill]="n";msg=`${pn(kill)} が たべられちゃった…`}
+ render(`<div class="big">☀️</div><h1>あさになったよ</h1><p>${msg}</p><button class="btn" data-a="afterMorning">つぎへ</button>`);
+}
+function roster(){
+ const c={},w={n:0,v:0};S.roles.forEach(r=>c[r]=(c[r]||0)+1);
+ S.out.forEach((o,i)=>{if(o)w[S.why[i]]++});
+ const rl=["liar","owl","dog","rabbit"].filter(r=>c[r]).map(r=>`<span class="chip">${ROLES[r].e} ${ROLES[r].n} ×${c[r]}</span>`).join("");
+ const ps=[...Array(S.n).keys()].map(i=>S.out[i]?`<span class="gone">${pn(i)}</span>`:`<span>${pn(i)}</span>`).join("");
+ const a=alive().length;
+ const dec=S.day>1?`<p class="res">はじめは ${S.n}人 → いまは ${a}人<br>${S.n-a}人 へったよ</p><p class="sub">へった人の やくわりは ひみつだよ</p>`:"";
+ return `<div class="card"><p class="sub">この ゲームの やくわり（ぜんぶで ${S.n}人）</p><div class="chips">${rl}</div><p class="sub">のこっている人</p><div class="plist">${ps}</div>${dec}</div>`}
+function dayIntro(){render(`<div class="big">☀️</div><h1>${S.day}日目の ひる</h1><p>みんなで あつまってね。</p><button class="btn" data-a="discuss">はなしあいを はじめる</button>`)}
+function discuss(){
+ let t=180;
+ render(`<div class="big">💬</div><h1>はなしあい</h1><p>だれが うそつきオオカミかな？</p>
+ ${roster()}
+ <div class="timer" id="tm">3:00</div><button class="btn" data-a="vote">とうひょうへ</button>`);
+ clearInterval(S.tm);
+ S.tm=setInterval(()=>{t--;const e=document.getElementById("tm");if(!e){clearInterval(S.tm);return}
+  e.textContent=t>0?Math.floor(t/60)+":"+String(t%60).padStart(2,"0"):"じかんだよ！";if(t<=0)clearInterval(S.tm)},1000);
+}
+function voteTurn(){
+ if(S.vi>=S.vq.length)return render(`<div class="big">🗳️</div><h1>とうひょう おわり！</h1><p>みんなで がめんを 見てね。<br>じゅんびは いいかな？</p><button class="btn" data-a="result">けっかを 見る</button>`);
+ const i=S.vq[S.vi];
+ handover(i,"とうひょうの ばんだよ",()=>choose(i,`<div class="big">🗳️</div><h2>${pn(i)}</h2><p>${S.cands?"けっせん！<br>":""}うそつきだと おもう人を えらんでね</p>`,(S.cands||alive()).filter(j=>j!==i),j=>{S.votes[j]=(S.votes[j]||0)+1;S.vi++;voteTurn()}));
+}
+function tally(){
+ const e=Object.entries(S.votes).map(([k,v])=>[+k,v]).sort((a,b)=>b[1]-a[1]);
+ const bars=e.map(([k,v])=>`<div class="row"><span>${pn(k)}</span><b>${v}ひょう</b></div>`).join("");
+ S.bars=bars;const top=e.filter(x=>x[1]===e[0][1]).map(x=>x[0]);
+ if(top.length===1)return result(top[0]);
+ if(S.cands){S.top=top;return render(`<div class="big">🎲</div><h1>また おなじ ひょう！</h1><div class="card">${bars}</div><p>${top.map(pn).join("　")}</p><p>ルーレットで きめるよ。<br>みんなで 見ていてね。</p><button class="btn" data-a="spin">ルーレットを まわす</button>`)}
+ S.tied=top;
+ render(`<div class="big">⚖️</div><h1>とうひょうの けっか</h1><div class="card">${bars}</div><p>ひょうが おなじだったよ！<br>${top.map(pn).join("　")}</p><p>この 人たちの 中から、のこりの 人で<br>けっせん とうひょうを するよ。</p><button class="btn" data-a="runoff">けっせん とうひょうへ</button>`);
+}
+function result(w,nb){S.out[w]=true;S.why[w]="v";render(`<div class="big">🏠</div><h1>${nb?"ルーレットの けっか":"とうひょうの けっか"}</h1>${nb?"":`<div class="card">${S.bars}</div>`}<p>${pn(w)} が おうちに かえるよ。</p><button class="btn" data-a="afterVote">つぎへ</button>`)}
+function end(){
+ const w=winner(),L=w==="liar";
+ render(`<div class="big">${L?"🐺":"🎉"}</div><h1>${L?"うそつきオオカミの かち！":"なかまの かち！"}</h1>
+ <p>${L?"うそつきが みんなを だましきったよ…":"うそつきオオカミを みつけたよ！"}</p>
+ <div class="card">${[...Array(S.n).keys()].map(i=>`<div class="row"><span>${pn(i)}</span><span>${ROLES[S.roles[i]].e} ${ROLES[S.roles[i]].n}</span></div>`).join("")}</div>
+ <button class="btn" data-a="again">もういちど（おなじメンバー）</button><button class="btn sub" data-a="top">さいしょに もどる</button>`);
+}
+
+const act={
+ go:()=>S.cb(),
+ inc:()=>{readNames();if(S.n<8)S.n++;setup()},
+ dec:()=>{readNames();if(S.n>4)S.n--;setup()},
+ start:startGame,rules,top:()=>{clearInterval(S.tm);setup()},
+ peek:()=>{const k=S.k,r=ROLES[S.roles[k]],h=S.roles[k]==="owl"?`<p class="res">${pn(S.hint)} は…<br><b>✨ うそつきじゃないよ</b></p>`:"";render(`<div class="big">${r.e}</div><h2>${r.n}</h2><p>${r.d}</p>${h}<button class="btn" data-a="hide">かくして つぎの人へ</button>`)},
+ hide:()=>reveal(S.k+1),
+ turn:nextTurn,
+ sel:v=>{S.ch.sel=+v;drawChoose(true)},
+ ok:()=>{if(S.ch.sel!==null)S.ch.ok(S.ch.sel)},
+ done:()=>{S.qi++;nextTurn()},
+ afterMorning:()=>{if(winner())return end();S.day++;dayIntro()},
+ vote:()=>{clearInterval(S.tm);S.cands=null;S.vq=alive();S.vi=0;S.votes={};voteTurn()},
+ result:()=>tally(),
+ runoff:()=>{S.cands=S.tied.slice();S.vq=alive().filter(i=>!S.tied.includes(i));if(!S.vq.length)S.vq=alive();S.vi=0;S.votes={};voteTurn()},
+ spin:()=>{const t=S.top,L=60,seq=[];for(let k=0;k<=L+1;k++){let x;do{x=t[Math.floor(Math.random()*t.length)]}while(t.length>1&&k>0&&x===seq[k-1]);seq.push(x)}
+  const w=seq[L];render(`<div class="big">🎲</div><h1>ルーレット</h1><div class="slot"><div class="strip" id="st">${seq.map(x=>`<div class="it">${pn(x)}</div>`).join("")}</div><div class="band"></div><div class="fade"></div></div>`);
+  const st=document.getElementById("st");void st.offsetHeight;st.style.transition="transform 8s cubic-bezier(.15,.7,.1,1)";st.style.transform=`translateY(${-(L-1)*60}px)`;
+  setTimeout(()=>result(w,1),9400)},
+ morning:()=>morning(),
+ discuss:()=>discuss(),
+ afterVote:()=>{if(winner())return end();night()},
+ again:()=>{S.names=S.names.slice();startGame()}
+};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b&&act[b.dataset.a])act[b.dataset.a](b.dataset.v)});
+setup();
+</script>
+</body>
+</html>
