@@ -1,0 +1,5 @@
+# 元のバックアップ ZIP
+*.zip
+
+# macOS
+.DS_Store
