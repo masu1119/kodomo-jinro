@@ -58,10 +58,11 @@ p{text-align:center;margin:.5em 0}
 <body>
 <div id="app"></div>
 <script>
-const COLORS=[["あか","#e74c3c"],["あお","#3b82f6"],["きいろ","#f1c40f"],["みどり","#27ae60"],["オレンジ","#f39c12"],["むらさき","#9b59b6"],["ちゃいろ","#8d6e63"],["ピンク","#ff7eb6"]];
+const COLORS=[["あか","#e74c3c"],["あお","#3b82f6"],["きいろ","#f1c40f"],["みどり","#27ae60"],["オレンジ","#f39c12"],["むらさき","#9b59b6"],["ちゃいろ","#8d6e63"],["ピンク","#ff7eb6"],["みずいろ","#4dd0e1"]];
 const ROLES={
 liar:{n:"うそつきオオカミ",e:"🐺",d:"よるにひとりを、たべるよ。ひるは、なかまのふりをして、うまくごまかしてね。"},
 owl:{n:"ものしりフクロウ",e:"🦉",d:"はじめに、うそつきじゃない人を ひとり おしえてもらえるよ。よるには ひとりを えらんで、うそつきオオカミか どうか しらべられるよ。"},
+fox:{n:"いたずらキツネ",e:"🦊",d:"うそつきオオカミの みかただよ。でも、オオカミが だれかは しらないよ。ひるは うそを ついて、みんなを まどわせてね。オオカミが かったら、キツネも かち！（フクロウに しらべられても「うそつきじゃない」と でるよ）"},
 dog:{n:"まもりイヌ",e:"🐶",d:"よるにひとりをまもるよ。まもられた人は、たべられないよ。"},
 rabbit:{n:"なかよしウサギ",e:"🐰",d:"とくべつな力は ないよ。はなしあいと とうひょうで、うそつきオオカミを 見つけてね！"}};
 const PLACES=[["🌳","大きな木",["どんぐり","きれいな はっぱ","ふわふわの はね"]],["🌊","川",["ツルツルの 石","小さな さかな","キラキラの 水"]],["🌿","草のなか",["よつばの クローバー","てんとうむし","あまい きのみ"]],["🌸","花ばたけ",["きれいな 花","ちょうちょ","あまい みつ"]]];
@@ -79,7 +80,7 @@ function choose(i,head,cands,ok,night,lab){S.ch={i,head,cands,ok,sel:null,night,
 function drawChoose(keep){const c=S.ch;render(`${c.head}<div class="grid">${c.cands.map(j=>`<button class="pl${c.sel===j?" on":""}" data-a="sel" data-v="${j}">${c.lab?c.lab(j):pn(j)}</button>`).join("")}</div><button class="btn" data-a="ok" ${c.sel===null?"disabled":""}>${c.lab?"ここにする":"この人にする"}</button>`,c.night,keep)}
 
 function setup(){
- while(S.names.length<8)S.names.push(COLORS[S.names.length][0]);
+ while(S.names.length<COLORS.length)S.names.push(COLORS[S.names.length][0]);
  render(`<div class="big">🌲🐺🦉🐶🐰🌲</div><h1>こどもじんろう</h1><p class="subt">うそつきを見つけだせ</p>
  <p class="sub">森のどうぶつの 中に、うそつきオオカミが まぎれているよ。はなしあって、見つけだそう！</p>
  <div class="card"><div class="row"><b>にんずう</b><span class="cnt"><button class="rb" data-a="dec" aria-label="へらす">−</button><b>${S.n}</b><button class="rb" data-a="inc" aria-label="ふやす">＋</button></span></div>
@@ -88,6 +89,7 @@ function setup(){
 }
 function rules(){render(`<h1>あそびかた</h1><div class="card">
 <p>🐺 うそつきオオカミは、みんなに ばれないように だまします。</p>
+<p>🦊 7人いじょうだと、いたずらキツネが まじるよ。キツネは オオカミの みかただけど、フクロウが しらべても「うそつきじゃない」と でるよ。</p>
 <p>🌙 よるは、ひとりずつ スマホ（タブレット）を うけとって、じぶんの ばんに そうさします。</p>
 <p>☀️ あさは、だれが たべられたか みんなで 見ます。</p>
 <p>💬 はなしあって、うそつきだと おもう人に とうひょう。いちばん おおい人は おうちに かえります。ひょうが おなじときは、けっせん とうひょうを します。</p>
@@ -96,9 +98,9 @@ function rules(){render(`<h1>あそびかた</h1><div class="card">
 <button class="btn" data-a="top">もどる</button>`)}
 function startGame(){
  readNames();
- const r=["liar","owl"];if(S.n>=6)r.push("dog");while(r.length<S.n)r.push("rabbit");
+ const r=["liar","owl"];if(S.n>=6)r.push("dog");if(S.n>=7)r.push("fox");while(r.length<S.n)r.push("rabbit");
  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}
- S.roles=r;S.out=[];S.why=[];S.day=1;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];reveal(0);
+ S.roles=r;S.out=[];S.why=[];S.day=1;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar"&&r[i]!=="fox");S.hint=c[Math.floor(Math.random()*c.length)];reveal(0);
 }
 function reveal(k){
  if(k>=S.n)return dayIntro();
@@ -115,8 +117,8 @@ function nextTurn(){
 }
 function turn(i){
  const role=S.roles[i];
- const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:"もりを たんけん！<br>いく ばしょを えらんでね"}[role];
- const rb=role==="rabbit",cands=rb?[0,1,2,3]:alive().filter(j=>role==="dog"||j!==i);
+ const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:"もりを たんけん！<br>いく ばしょを えらんでね",fox:"もりを たんけん！<br>いく ばしょを えらんでね"}[role];
+ const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>role==="dog"||j!==i);
  choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>`,cands,j=>{
   if(role==="liar")S.acts.kill=j;
   if(role==="dog")S.acts.guard=j;
@@ -134,7 +136,7 @@ function morning(){
 function roster(){
  const c={},w={n:0,v:0};S.roles.forEach(r=>c[r]=(c[r]||0)+1);
  S.out.forEach((o,i)=>{if(o)w[S.why[i]]++});
- const rl=["liar","owl","dog","rabbit"].filter(r=>c[r]).map(r=>`<span class="chip">${ROLES[r].e} ${ROLES[r].n} ×${c[r]}</span>`).join("");
+ const rl=["liar","fox","owl","dog","rabbit"].filter(r=>c[r]).map(r=>`<span class="chip">${ROLES[r].e} ${ROLES[r].n} ×${c[r]}</span>`).join("");
  const ps=[...Array(S.n).keys()].map(i=>S.out[i]?`<span class="gone">${pn(i)}</span>`:`<span>${pn(i)}</span>`).join("");
  const a=alive().length;
  const dec=S.day>1?`<p class="res">はじめは ${S.n}人 → いまは ${a}人<br>${S.n-a}人 へったよ</p><p class="sub">へった人の やくわりは ひみつだよ</p>`:"";
@@ -165,16 +167,17 @@ function tally(){
 }
 function result(w,nb){S.out[w]=true;S.why[w]="v";render(`<div class="big">🏠</div><h1>${nb?"ルーレットの けっか":"とうひょうの けっか"}</h1>${nb?"":`<div class="card">${S.bars}</div>`}<p>${pn(w)} が おうちに かえるよ。</p><button class="btn" data-a="afterVote">つぎへ</button>`)}
 function end(){
- const w=winner(),L=w==="liar";
- render(`<div class="big">${L?"🐺":"🎉"}</div><h1>${L?"うそつきオオカミの かち！":"なかまの かち！"}</h1>
+ const w=winner(),L=w==="liar",F=S.roles.includes("fox");
+ render(`<div class="big">${L?(F?"🐺🦊":"🐺"):"🎉"}</div><h1>${L?(F?"オオカミと キツネの かち！":"うそつきオオカミの かち！"):"なかまの かち！"}</h1>
  <p>${L?"うそつきが みんなを だましきったよ…":"うそつきオオカミを みつけたよ！"}</p>
+ ${F?`<p class="sub">${L?"🦊 キツネも オオカミの みかたとして かちだよ！":"🦊 キツネは オオカミの みかただったので まけだよ"}</p>`:""}
  <div class="card">${[...Array(S.n).keys()].map(i=>`<div class="row"><span>${pn(i)}</span><span>${ROLES[S.roles[i]].e} ${ROLES[S.roles[i]].n}</span></div>`).join("")}</div>
  <button class="btn" data-a="again">もういちど（おなじメンバー）</button><button class="btn sub" data-a="top">さいしょに もどる</button>`);
 }
 
 const act={
  go:()=>S.cb(),
- inc:()=>{readNames();if(S.n<8)S.n++;setup()},
+ inc:()=>{readNames();if(S.n<COLORS.length)S.n++;setup()},
  dec:()=>{readNames();if(S.n>4)S.n--;setup()},
  start:startGame,rules,top:()=>{clearInterval(S.tm);setup()},
  peek:()=>{const k=S.k,r=ROLES[S.roles[k]],h=S.roles[k]==="owl"?`<p class="res">${pn(S.hint)} は…<br><b>✨ うそつきじゃないよ</b></p>`:"";render(`<div class="big">${r.e}</div><h2>${r.n}</h2><p>${r.d}</p>${h}<button class="btn" data-a="hide">かくして つぎの人へ</button>`)},
