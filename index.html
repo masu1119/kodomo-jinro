@@ -85,17 +85,8 @@ function setup(){
  <p class="sub">森のどうぶつの 中に、うそつきオオカミが まぎれているよ。はなしあって、見つけだそう！</p>
  <div class="card"><div class="row"><b>にんずう</b><span class="cnt"><button class="rb" data-a="dec" aria-label="へらす">−</button><b>${S.n}</b><button class="rb" data-a="inc" aria-label="ふやす">＋</button></span></div>
  ${S.names.slice(0,S.n).map((nm,i)=>`<div class="nm">${dot(i)}<input maxlength="8" value="${esc(nm)}" data-i="${i}" aria-label="${i+1}ばんめの なまえ"></div>`).join("")}</div>
- <button class="btn" data-a="start">はじめる</button><button class="btn sub" data-a="rules">あそびかた</button>`);
+ <button class="btn" data-a="start">はじめる</button>`);
 }
-function rules(){render(`<h1>あそびかた</h1><div class="card">
-<p>🐺 うそつきオオカミは、みんなに ばれないように だまします。</p>
-<p>🦊 7人いじょうだと、いたずらキツネが まじるよ。キツネは オオカミの みかただけど、フクロウが しらべても「オオカミじゃない」と でるよ。</p>
-<p>🌙 よるは、ひとりずつ スマホ（タブレット）を うけとって、じぶんの ばんに そうさします。</p>
-<p>☀️ あさは、だれが たべられたか みんなで 見ます。</p>
-<p>💬 はなしあって、うそつきだと おもう人に とうひょう。いちばん おおい人は おうちに かえります。ひょうが おなじときは、けっせん とうひょうを します。</p>
-<p>🏆 うそつきオオカミを おうちに かえしたら なかまの かち。うそつきが なかまと おなじかず まで ふえたら うそつきの かち。</p>
-<p class="sub">ほかの人の がめんは 見ないでね！</p></div>
-<button class="btn" data-a="top">もどる</button>`)}
 function startGame(){
  readNames();
  const r=["liar","owl"];if(S.n>=6)r.push("dog");if(S.n>=7)r.push("fox");while(r.length<S.n)r.push("rabbit");
@@ -182,7 +173,7 @@ const act={
  go:()=>S.cb(),
  inc:()=>{readNames();if(S.n<COLORS.length)S.n++;setup()},
  dec:()=>{readNames();if(S.n>4)S.n--;setup()},
- start:startGame,rules,top:()=>{clearInterval(S.tm);setup()},
+ start:startGame,top:()=>{clearInterval(S.tm);setup()},
  peek:()=>{const k=S.k,r=ROLES[S.roles[k]],h=S.roles[k]==="owl"?`<p class="res">${pn(S.hint)} は…<br><b>✨ オオカミじゃないよ</b></p>`:"";render(`<div class="big">${r.e}</div><h2>${r.n}</h2><p>${r.d}</p>${h}<button class="btn" data-a="hide">かくして つぎの人へ</button>`)},
  hide:()=>reveal(S.k+1),
  turn:nextTurn,
