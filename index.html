@@ -212,7 +212,7 @@ function discuss(){
 function voteTurn(){
  if(S.vi>=S.vq.length)return render(`<div class="big">🗳️</div><h1>とうひょう おわり！</h1><p>みんなで がめんを 見てね。<br>じゅんびは いいかな？</p><button class="btn" data-a="result">けっかを 見る</button>`);
  const i=S.vq[S.vi];
- handover(i,"とうひょうの ばんだよ",()=>choose(i,`<div class="big">🗳️</div><h2>${pn(i)}</h2><p>${S.cands?"けっせん！<br>":""}じんろうだと おもう人を えらんでね</p>`,(S.cands||alive()).filter(j=>j!==i),j=>{S.votes[j]=(S.votes[j]||0)+1;S.vi++;voteTurn()}));
+ handover(i,"とうひょうの じかんだよ",()=>choose(i,`<div class="big">🗳️</div><h2>${pn(i)}</h2><p>${S.cands?"けっせん！<br>":""}じんろうだと おもう人を えらんでね</p>`,(S.cands||alive()).filter(j=>j!==i),j=>{S.votes[j]=(S.votes[j]||0)+1;S.vi++;voteTurn()}));
 }
 function tally(){
  const e=Object.entries(S.votes).map(([k,v])=>[+k,v]).sort((a,b)=>b[1]-a[1]);
