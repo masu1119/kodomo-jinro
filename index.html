@@ -60,11 +60,11 @@ p{text-align:center;margin:.5em 0}
 <script>
 const COLORS=[["あか","#e74c3c"],["あお","#3b82f6"],["きいろ","#f1c40f"],["みどり","#27ae60"],["オレンジ","#f39c12"],["むらさき","#9b59b6"],["ちゃいろ","#8d6e63"],["ピンク","#ff7eb6"],["みずいろ","#4dd0e1"]];
 const ROLES={
-liar:{n:"うそつきオオカミ",e:"🐺",d:"よるにひとりを、たべるよ。ひるは、なかまのふりをして、うまくごまかしてね。"},
-owl:{n:"ものしりフクロウ",e:"🦉",d:"はじめに、オオカミじゃない人を ひとり おしえてもらえるよ。よるには ひとりを えらんで、オオカミか どうか しらべられるよ。",x:{fox:"（キツネは オオカミじゃないので「オオカミじゃない」と でるよ）"}},
-fox:{n:"いたずらキツネ",e:"🦊",d:"うそつきオオカミの みかただよ。でも、オオカミが だれかは しらないよ。ひるは うそを ついて、みんなを まどわせてね。オオカミが かったら、キツネも かち！",x:{owl:"（フクロウに しらべられても「オオカミじゃない」と でるよ）"}},
-dog:{n:"まもりイヌ",e:"🐶",d:"よるに じぶん いがいの ひとりを まもるよ。まもられた人は、たべられないよ。でも、おなじ人を 2日 つづけては まもれないよ。"},
-rabbit:{n:"なかよしウサギ",e:"🐰",d:"とくべつな力は ないよ。はなしあいと とうひょうで、うそつきオオカミを 見つけてね！"}};
+liar:{n:"じんろうオオカミ",e:"🐺",d:"よるにひとりを、たべるよ。ひるは、むらびとの ふりをして、うまくごまかしてね。"},
+owl:{n:"うらないフクロウ",e:"🦉",d:"はじめに、じんろうじゃない人を ひとり おしえてもらえるよ。よるには ひとりを えらんで、じんろうか どうか しらべられるよ。",x:{fox:"（キツネは じんろうじゃないので「じんろうじゃない」と でるよ）"}},
+fox:{n:"うらぎりキツネ",e:"🦊",d:"じんろうの みかただよ。でも、じんろうが だれかは しらないよ。ひるは うそを ついて、みんなを まどわせてね。じんろうが かったら、キツネも かち！",x:{owl:"（フクロウに しらべられても「じんろうじゃない」と でるよ）"}},
+dog:{n:"きしイヌ",e:"🐶",d:"よるに じぶん いがいの ひとりを まもるよ。まもられた人は、たべられないよ。でも、おなじ人を 2日 つづけては まもれないよ。"},
+rabbit:{n:"むらびとウサギ",e:"🐰",d:"とくべつな力は ないよ。はなしあいと とうひょうで、じんろうを 見つけてね！"}};
 const PLACES=[["🌳","大きな木",["どんぐり","きれいな はっぱ","ふわふわの はね"]],["🌊","川",["ツルツルの 石","小さな さかな","キラキラの 水"]],["🌿","草のなか",["よつばの クローバー","てんとうむし","あまい きのみ"]],["🌸","花ばたけ",["きれいな 花","ちょうちょ","あまい みつ"]]];
 const app=document.getElementById("app");
 const S={n:5,names:[],roles:[],out:[],nt:false};
@@ -81,15 +81,15 @@ function drawChoose(keep){const c=S.ch;render(`${c.head}<div class="grid">${c.ca
 
 function setup(){
  while(S.names.length<COLORS.length)S.names.push(COLORS[S.names.length][0]);
- render(`<div class="big">🌲🐺🦉🐶🐰🌲</div><h1>こどもじんろう</h1><p class="subt">うそつきを見つけだせ</p>
- <p class="sub">森のどうぶつの 中に、うそつきオオカミが まぎれているよ。はなしあって、見つけだそう！</p>
+ render(`<div class="big">🌲🐺🦉🐶🐰🌲</div><h1>こどもじんろう</h1><p class="subt">じんろうを 見つけだせ</p>
+ <p class="sub">森のどうぶつの 中に、じんろうが まぎれているよ。はなしあって、見つけだそう！</p>
  <div class="card"><div class="row"><b>にんずう</b><span class="cnt"><button class="rb" data-a="dec" aria-label="へらす">−</button><b>${S.n}</b><button class="rb" data-a="inc" aria-label="ふやす">＋</button></span></div>
  ${S.names.slice(0,S.n).map((nm,i)=>`<div class="nm">${dot(i)}<input maxlength="8" value="${esc(nm)}" data-i="${i}" aria-label="${i+1}ばんめの なまえ"></div>`).join("")}</div>
  <button class="btn" data-a="start">はじめる</button>`);
 }
 function startGame(){
  readNames();
- // おすすめ: 8人から オオカミ2ひき。キツネは 7人と 9人（8人は なし）
+ // おすすめ: 8人から じんろう2ひき。キツネは 7人と 9人（8人は なし）
  const r=["liar","owl"];if(S.n>=8)r.push("liar");if(S.n>=6)r.push("dog");if(S.n===7||S.n>=9)r.push("fox");while(r.length<S.n)r.push("rabbit");
  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}
  S.roles=r;S.out=[];S.why=[];S.day=1;S.lastGuard=null;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];S.owlLog=[{d:0,j:S.hint,w:false}];S.items={};reveal(0);
@@ -112,9 +112,9 @@ function turn(i){
  const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:"もりを たんけん！<br>いく ばしょを えらんでね",fox:"もりを たんけん！<br>いく ばしょを えらんでね"}[role];
  // イヌは じぶんと、まえの よるに まもった人を えらべない
  const lg=role==="dog"&&S.lastGuard!=null&&!S.out[S.lastGuard]?S.lastGuard:null;
- // オオカミは なかまの オオカミを えらべない
+ // じんろうは なかまの じんろうを えらべない
  const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg&&!(role==="liar"&&S.roles[j]==="liar"));
- // 2ひきめの オオカミには、1ぴきめが えらんだ人を おしえる（そのままか、えらびなおして 2ひきめが さいしゅう けってい）
+ // 2ひきめの じんろうには、1ぴきめが えらんだ人を おしえる（そのままか、えらびなおして 2ひきめが さいしゅう けってい）
  const wp=role==="liar"&&S.acts.kill!==undefined?S.acts.kill:null;
  const wn=role==="liar"?wolfMates(i)+(wp!=null?`<p class="res">なかまの ${pn(S.acts.wb)} は<br><b>${pn(wp)}</b> を えらんだよ</p><p class="sub">そのままで いいなら「この人にする」。<br>ちがう人に したいなら、えらびなおしてね。<br>きみが えらんだ人に きまるよ。</p>`:""):"";
  const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:role==="owl"?owlLog():rb?`<p class="sub">たんけんは ゲームの かちまけには かんけい ないよ。<br>森の アイテムを あつめてみよう！</p>${itemLog(i)}`:wn;
@@ -124,20 +124,20 @@ function turn(i){
   if(role==="owl")S.owlLog.push({d:S.day,j,w:S.roles[j]==="liar"});
   const f=rb?PLACES[j]:null,it=rb?f[2][Math.floor(Math.random()*3)]:null;
   if(rb)(S.items[i]=S.items[i]||[]).push({d:S.day,p:f[0],it});
-  const res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${it}</b> を 見つけたよ！</p>`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 オオカミだ！":"✨ オオカミじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
+  const res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${it}</b> を 見つけたよ！</p>`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 じんろうだ！":"✨ じんろうじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
   render(`<h2>${pn(i)}</h2>${res}<button class="btn" data-a="done">かくして つぎの人へ</button>`,true);
  },true,rb?j=>PLACES[j][0]+" "+PLACES[j][1]:null);
  if(wp!=null){S.ch.sel=wp;drawChoose(true)}
 }
-// オオカミの なかま（じぶん いがいの オオカミ）。いなくなった なかまは とりけし線
+// じんろうの なかま（じぶん いがいの じんろう）。いなくなった なかまは とりけし線
 function wolfMates(i,big){
  const m=[...Array(S.n).keys()].filter(j=>j!==i&&S.roles[j]==="liar");if(!m.length)return"";
  const ns=m.map(j=>S.out[j]?`<span class="gone">${pn(j)}</span>`:pn(j)).join("　");
- return big?`<p class="res">🐺 なかまの オオカミは<br><b>${ns}</b></p>`:`<p class="sub">🐺 なかまの オオカミ：${ns}</p>`}
+ return big?`<p class="res">🐺 なかまの じんろうは<br><b>${ns}</b></p>`:`<p class="sub">🐺 なかまの じんろう：${ns}</p>`}
 // フクロウが これまでに しらべた けっか（はじめの ヒントも ふくむ）
 function owlLog(){
  if(!S.owlLog||!S.owlLog.length)return"";
- return `<div class="card"><p class="sub">これまでに わかったこと</p>${S.owlLog.map(x=>`<div class="row"><span><small class="sub">${x.d?x.d+"日目の よる":"はじめ"}</small><br><span class="${S.out[x.j]?"gone":""}">${pn(x.j)}</span></span><b>${x.w?"🐺 オオカミ":"✨ オオカミじゃない"}</b></div>`).join("")}</div>`}
+ return `<div class="card"><p class="sub">これまでに わかったこと</p>${S.owlLog.map(x=>`<div class="row"><span><small class="sub">${x.d?x.d+"日目の よる":"はじめ"}</small><br><span class="${S.out[x.j]?"gone":""}">${pn(x.j)}</span></span><b>${x.w?"🐺 じんろう":"✨ じんろうじゃない"}</b></div>`).join("")}</div>`}
 // たんけんで あつめた アイテム（その人の ぶんだけ）
 function itemLog(i){
  const a=S.items&&S.items[i];if(!a||!a.length)return"";
@@ -160,7 +160,7 @@ function roster(){
 function dayIntro(){render(`<div class="big">☀️</div><h1>${S.day}日目の ひる</h1><p>みんなで あつまってね。</p><button class="btn" data-a="discuss">はなしあいを はじめる</button>`)}
 function discuss(){
  let t=180;
- render(`<div class="big">💬</div><h1>はなしあい</h1><p>だれが うそつきオオカミかな？</p>
+ render(`<div class="big">💬</div><h1>はなしあい</h1><p>だれが じんろうかな？</p>
  ${roster()}
  <div class="timer" id="tm">3:00</div><button class="btn" data-a="vote">とうひょうへ</button>`);
  clearInterval(S.tm);
@@ -170,7 +170,7 @@ function discuss(){
 function voteTurn(){
  if(S.vi>=S.vq.length)return render(`<div class="big">🗳️</div><h1>とうひょう おわり！</h1><p>みんなで がめんを 見てね。<br>じゅんびは いいかな？</p><button class="btn" data-a="result">けっかを 見る</button>`);
  const i=S.vq[S.vi];
- handover(i,"とうひょうの ばんだよ",()=>choose(i,`<div class="big">🗳️</div><h2>${pn(i)}</h2><p>${S.cands?"けっせん！<br>":""}うそつきだと おもう人を えらんでね</p>`,(S.cands||alive()).filter(j=>j!==i),j=>{S.votes[j]=(S.votes[j]||0)+1;S.vi++;voteTurn()}));
+ handover(i,"とうひょうの ばんだよ",()=>choose(i,`<div class="big">🗳️</div><h2>${pn(i)}</h2><p>${S.cands?"けっせん！<br>":""}じんろうだと おもう人を えらんでね</p>`,(S.cands||alive()).filter(j=>j!==i),j=>{S.votes[j]=(S.votes[j]||0)+1;S.vi++;voteTurn()}));
 }
 function tally(){
  const e=Object.entries(S.votes).map(([k,v])=>[+k,v]).sort((a,b)=>b[1]-a[1]);
@@ -184,9 +184,9 @@ function tally(){
 function result(w,nb){S.out[w]=true;S.why[w]="v";render(`<div class="big">🌲</div><h1>${nb?"ルーレットの けっか":"とうひょうの けっか"}</h1>${nb?"":`<div class="card">${S.bars}</div>`}<p>${pn(w)} は 森を はなれることに なったよ。</p><button class="btn" data-a="afterVote">つぎへ</button>`)}
 function end(){
  const w=winner(),L=w==="liar",F=S.roles.includes("fox");
- render(`<div class="big">${L?(F?"🐺🦊":"🐺"):"🎉"}</div><h1>${L?(F?"オオカミと キツネの かち！":"うそつきオオカミの かち！"):"なかまの かち！"}</h1>
- <p>${L?"うそつきが みんなを だましきったよ…":"うそつきオオカミを みつけたよ！"}</p>
- ${F?`<p class="sub">${L?"🦊 キツネも オオカミの みかたとして かちだよ！":"🦊 キツネは オオカミの みかただったので まけだよ"}</p>`:""}
+ render(`<div class="big">${L?(F?"🐺🦊":"🐺"):"🎉"}</div><h1>${L?(F?"じんろうと キツネの かち！":"じんろうの かち！"):"むらびとチームの かち！"}</h1>
+ <p>${L?"じんろうが みんなを だましきったよ…":"じんろうを みつけたよ！"}</p>
+ ${F?`<p class="sub">${L?"🦊 キツネも じんろうの みかたとして かちだよ！":"🦊 キツネは じんろうの みかただったので まけだよ"}</p>`:""}
  <div class="card">${[...Array(S.n).keys()].map(i=>`<div class="row"><span>${pn(i)}</span><span>${ROLES[S.roles[i]].e} ${ROLES[S.roles[i]].n}</span></div>`).join("")}</div>
  <button class="btn" data-a="again">もういちど（おなじメンバー）</button><button class="btn sub" data-a="top">さいしょに もどる</button>`);
 }
@@ -196,7 +196,7 @@ const act={
  inc:()=>{readNames();if(S.n<COLORS.length)S.n++;setup()},
  dec:()=>{readNames();if(S.n>4)S.n--;setup()},
  start:startGame,top:()=>{clearInterval(S.tm);setup()},
- peek:()=>{const k=S.k,r=ROLES[S.roles[k]],h=S.roles[k]==="owl"?`<p class="res">${pn(S.hint)} は…<br><b>✨ オオカミじゃないよ</b></p>`:S.roles[k]==="liar"?wolfMates(k,true):"";// x: その やくわりが ゲームに いるときだけ つけたす せつめい
+ peek:()=>{const k=S.k,r=ROLES[S.roles[k]],h=S.roles[k]==="owl"?`<p class="res">${pn(S.hint)} は…<br><b>✨ じんろうじゃないよ</b></p>`:S.roles[k]==="liar"?wolfMates(k,true):"";// x: その やくわりが ゲームに いるときだけ つけたす せつめい
   const x=Object.entries(r.x||{}).filter(([k])=>S.roles.includes(k)).map(([,t])=>t).join("");
   render(`<div class="big">${r.e}</div><h2>${r.n}</h2><p>${r.d}${x}</p>${h}<button class="btn" data-a="hide">かくして つぎの人へ</button>`)},
  hide:()=>reveal(S.k+1),
