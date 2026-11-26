@@ -91,7 +91,7 @@ function startGame(){
  readNames();
  const r=["liar","owl"];if(S.n>=6)r.push("dog");if(S.n>=7)r.push("fox");while(r.length<S.n)r.push("rabbit");
  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}
- S.roles=r;S.out=[];S.why=[];S.day=1;S.lastGuard=null;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];reveal(0);
+ S.roles=r;S.out=[];S.why=[];S.day=1;S.lastGuard=null;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];S.owlLog=[{d:0,j:S.hint,w:false}];reveal(0);
 }
 function reveal(k){
  if(k>=S.n)return dayIntro();
@@ -112,14 +112,19 @@ function turn(i){
  // イヌは じぶんと、まえの よるに まもった人を えらべない
  const lg=role==="dog"&&S.lastGuard!=null&&!S.out[S.lastGuard]?S.lastGuard:null;
  const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg);
- const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:"";
+ const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:role==="owl"?owlLog():"";
  choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>${note}`,cands,j=>{
   if(role==="liar")S.acts.kill=j;
   if(role==="dog"){S.acts.guard=j;S.lastGuard=j}
+  if(role==="owl")S.owlLog.push({d:S.day,j,w:S.roles[j]==="liar"});
   const f=rb?PLACES[j]:null,res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${f[2][Math.floor(Math.random()*3)]}</b> を 見つけたよ！</p>`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 オオカミだ！":"✨ オオカミじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
   render(`<h2>${pn(i)}</h2>${res}<button class="btn" data-a="done">かくして つぎの人へ</button>`,true);
  },true,rb?j=>PLACES[j][0]+" "+PLACES[j][1]:null);
 }
+// フクロウが これまでに しらべた けっか（はじめの ヒントも ふくむ）
+function owlLog(){
+ if(!S.owlLog||!S.owlLog.length)return"";
+ return `<div class="card"><p class="sub">これまでに わかったこと</p>${S.owlLog.map(x=>`<div class="row"><span><small class="sub">${x.d?x.d+"日目の よる":"はじめ"}</small><br><span class="${S.out[x.j]?"gone":""}">${pn(x.j)}</span></span><b>${x.w?"🐺 オオカミ":"✨ オオカミじゃない"}</b></div>`).join("")}</div>`}
 function dawn(){render(`<div class="big">🌙</div><h1>よるが おわったよ</h1><p>みんなで がめんを 見てね。<br>あさに なっても いいかな？</p><button class="btn" data-a="morning">あさを むかえる</button>`,true)}
 function morning(){
  const{kill,guard}=S.acts;let msg;
