@@ -110,17 +110,19 @@ function nextTurn(){
 }
 function turn(i){
  const role=S.roles[i];
- if(role==="medium")return mediumTurn(i);
- const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:"もりを たんけん！<br>いく ばしょを えらんでね",fox:"もりを たんけん！<br>いく ばしょを えらんでね"}[role];
+ // ウサギ・キツネ・クロネコは 森を たんけん（タップの かいすうを そろえて、しょうたいが ばれないように）
+ const ex="もりを たんけん！<br>いく ばしょを えらんでね";
+ const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:ex,fox:ex,medium:ex}[role];
+ const top=role==="medium"?mediumInfo():"";
  // イヌは じぶんと、まえの よるに まもった人を えらべない
  const lg=role==="dog"&&S.lastGuard!=null&&!S.out[S.lastGuard]?S.lastGuard:null;
  // じんろうは なかまの じんろうを えらべない
- const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg&&!(role==="liar"&&S.roles[j]==="liar"));
+ const rb=role==="rabbit"||role==="fox"||role==="medium",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg&&!(role==="liar"&&S.roles[j]==="liar"));
  // 2ひきめの じんろうには、1ぴきめが えらんだ人を おしえる（そのままか、えらびなおして 2ひきめが さいしゅう けってい）
  const wp=role==="liar"&&S.acts.kill!==undefined?S.acts.kill:null;
  const wn=role==="liar"?wolfMates(i)+(wp!=null?`<p class="res">なかまの ${pn(S.acts.wb)} は<br><b>${pn(wp)}</b> を えらんだよ</p><p class="sub">そのままで いいなら「この人にする」。<br>ちがう人に したいなら、えらびなおしてね。<br>きみが えらんだ人に きまるよ。</p>`:""):"";
  const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:role==="owl"?owlLog():rb?`<p class="sub">たんけんは ゲームの かちまけには かんけい ないよ。<br>森の アイテムを あつめてみよう！</p>${itemLog(i)}`:wn;
- choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>${note}`,cands,j=>{
+ choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2>${top}<p>${msg}</p>${note}`,cands,j=>{
   if(role==="liar"){S.acts.kill=j;S.acts.wb=i}
   if(role==="dog"){S.acts.guard=j;S.lastGuard=j}
   if(role==="owl")S.owlLog.push({d:S.day,j,w:S.roles[j]==="liar"});
@@ -136,15 +138,15 @@ function wolfMates(i,big){
  const m=[...Array(S.n).keys()].filter(j=>j!==i&&S.roles[j]==="liar");if(!m.length)return"";
  const ns=m.map(j=>S.out[j]?`<span class="gone">${pn(j)}</span>`:pn(j)).join("　");
  return big?`<p class="res">🐺 なかまの じんろうは<br><b>${ns}</b></p>`:`<p class="sub">🐺 なかまの じんろう：${ns}</p>`}
-// フクロウが これまでに しらべた けっか（はじめの ヒントも ふくむ）
-// れいばいクロネコ: その日の とうひょうで 森を はなれた人が じんろうだったかを しる（えらぶ ものは ない）
-function mediumTurn(i){
+// れいばいクロネコ: その日の とうひょうで 森を はなれた人が じんろうだったかを しる（このあと 森の たんけんも する）
+function mediumInfo(){
  const v=S.voted;
  if(v&&!S.medLog.some(x=>x.d===v.d))S.medLog.push({d:v.d,j:v.j,w:S.roles[v.j]==="liar"});
  const now=v&&S.medLog.find(x=>x.d===v.d),past=S.medLog.filter(x=>x!==now);
  const res=now?`<p class="res">きょう 森を はなれた<br>${pn(now.j)} は…<br><b>${now.w?"🐺 じんろうだった！":"✨ じんろうじゃなかったよ"}</b></p>`:`<p class="res">きょうは まだ だれも 森を はなれていないよ</p>`;
  const log=past.length?`<div class="card"><p class="sub">これまでに わかったこと</p>${past.map(x=>`<div class="row"><span><small class="sub">${x.d}日目に はなれた</small><br>${pn(x.j)}</span><b>${x.w?"🐺 じんろう":"✨ じんろうじゃない"}</b></div>`).join("")}</div>`:"";
- render(`<div class="big">${ROLES.medium.e}</div><h2>${pn(i)}</h2>${res}${log}<button class="btn" data-a="done">かくして つぎの人へ</button>`,true)}
+ return res+log}
+// フクロウが これまでに しらべた けっか（はじめの ヒントも ふくむ）
 function owlLog(){
  if(!S.owlLog||!S.owlLog.length)return"";
  return `<div class="card"><p class="sub">これまでに わかったこと</p>${S.owlLog.map(x=>`<div class="row"><span><small class="sub">${x.d?x.d+"日目の よる":"はじめ"}</small><br><span class="${S.out[x.j]?"gone":""}">${pn(x.j)}</span></span><b>${x.w?"🐺 じんろう":"✨ じんろうじゃない"}</b></div>`).join("")}</div>`}
