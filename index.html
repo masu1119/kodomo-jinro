@@ -63,7 +63,7 @@ const ROLES={
 liar:{n:"うそつきオオカミ",e:"🐺",d:"よるにひとりを、たべるよ。ひるは、なかまのふりをして、うまくごまかしてね。"},
 owl:{n:"ものしりフクロウ",e:"🦉",d:"はじめに、オオカミじゃない人を ひとり おしえてもらえるよ。よるには ひとりを えらんで、オオカミか どうか しらべられるよ。（キツネは オオカミじゃないので「オオカミじゃない」と でるよ）"},
 fox:{n:"いたずらキツネ",e:"🦊",d:"うそつきオオカミの みかただよ。でも、オオカミが だれかは しらないよ。ひるは うそを ついて、みんなを まどわせてね。オオカミが かったら、キツネも かち！（フクロウに しらべられても「オオカミじゃない」と でるよ）"},
-dog:{n:"まもりイヌ",e:"🐶",d:"よるにひとりをまもるよ。まもられた人は、たべられないよ。"},
+dog:{n:"まもりイヌ",e:"🐶",d:"よるに じぶん いがいの ひとりを まもるよ。まもられた人は、たべられないよ。でも、おなじ人を 2よる つづけては まもれないよ。"},
 rabbit:{n:"なかよしウサギ",e:"🐰",d:"とくべつな力は ないよ。はなしあいと とうひょうで、うそつきオオカミを 見つけてね！"}};
 const PLACES=[["🌳","大きな木",["どんぐり","きれいな はっぱ","ふわふわの はね"]],["🌊","川",["ツルツルの 石","小さな さかな","キラキラの 水"]],["🌿","草のなか",["よつばの クローバー","てんとうむし","あまい きのみ"]],["🌸","花ばたけ",["きれいな 花","ちょうちょ","あまい みつ"]]];
 const app=document.getElementById("app");
@@ -100,7 +100,7 @@ function startGame(){
  readNames();
  const r=["liar","owl"];if(S.n>=6)r.push("dog");if(S.n>=7)r.push("fox");while(r.length<S.n)r.push("rabbit");
  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}
- S.roles=r;S.out=[];S.why=[];S.day=1;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];reveal(0);
+ S.roles=r;S.out=[];S.why=[];S.day=1;S.lastGuard=null;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];reveal(0);
 }
 function reveal(k){
  if(k>=S.n)return dayIntro();
@@ -118,10 +118,13 @@ function nextTurn(){
 function turn(i){
  const role=S.roles[i];
  const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:"もりを たんけん！<br>いく ばしょを えらんでね",fox:"もりを たんけん！<br>いく ばしょを えらんでね"}[role];
- const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>role==="dog"||j!==i);
- choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>`,cands,j=>{
+ // イヌは じぶんと、まえの よるに まもった人を えらべない
+ const lg=role==="dog"&&S.lastGuard!=null&&!S.out[S.lastGuard]?S.lastGuard:null;
+ const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg);
+ const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:"";
+ choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>${note}`,cands,j=>{
   if(role==="liar")S.acts.kill=j;
-  if(role==="dog")S.acts.guard=j;
+  if(role==="dog"){S.acts.guard=j;S.lastGuard=j}
   const f=rb?PLACES[j]:null,res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${f[2][Math.floor(Math.random()*3)]}</b> を 見つけたよ！</p>`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 オオカミだ！":"✨ オオカミじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
   render(`<h2>${pn(i)}</h2>${res}<button class="btn" data-a="done">かくして つぎの人へ</button>`,true);
  },true,rb?j=>PLACES[j][0]+" "+PLACES[j][1]:null);
