@@ -164,7 +164,7 @@ function tally(){
  S.tied=top;
  render(`<div class="big">⚖️</div><h1>とうひょうの けっか</h1><div class="card">${bars}</div><p>ひょうが おなじだったよ！<br>${top.map(pn).join("　")}</p><p>この 人たちの 中から、のこりの 人で<br>けっせん とうひょうを するよ。</p><button class="btn" data-a="runoff">けっせん とうひょうへ</button>`);
 }
-function result(w,nb){S.out[w]=true;S.why[w]="v";render(`<div class="big">🏠</div><h1>${nb?"ルーレットの けっか":"とうひょうの けっか"}</h1>${nb?"":`<div class="card">${S.bars}</div>`}<p>${pn(w)} が おうちに かえるよ。</p><button class="btn" data-a="afterVote">つぎへ</button>`)}
+function result(w,nb){S.out[w]=true;S.why[w]="v";render(`<div class="big">🌲</div><h1>${nb?"ルーレットの けっか":"とうひょうの けっか"}</h1>${nb?"":`<div class="card">${S.bars}</div>`}<p>${pn(w)} は 森を はなれることに なったよ。</p><button class="btn" data-a="afterVote">つぎへ</button>`)}
 function end(){
  const w=winner(),L=w==="liar",F=S.roles.includes("fox");
  render(`<div class="big">${L?(F?"🐺🦊":"🐺"):"🎉"}</div><h1>${L?(F?"オオカミと キツネの かち！":"うそつきオオカミの かち！"):"なかまの かち！"}</h1>
