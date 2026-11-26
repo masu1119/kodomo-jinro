@@ -73,12 +73,13 @@ const esc=s=>s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&q
 const dot=i=>`<span class="dot" style="background:${COLORS[i][1]}"></span>`;
 const pn=i=>dot(i)+esc(S.names[i]);
 const alive=()=>[...Array(S.n).keys()].filter(i=>!S.out[i]);
-function render(h,night,keep){if(!keep)S.pos=1-(S.pos||0);app.className="p"+S.pos;S.nt=!!night;document.body.classList.toggle("night",S.nt);app.innerHTML=h;window.scrollTo(0,0)}
+function render(h,night,keep){if(!keep)S.pos=1-(S.pos||0);app.className="p"+S.pos;app.style.minHeight="";S.nt=!!night;document.body.classList.toggle("night",S.nt);app.innerHTML=h;window.scrollTo(0,0)}
 function winner(){const a=alive(),l=a.filter(i=>S.roles[i]==="liar").length;if(!l)return"rabbit";if(l>=a.length-l)return"liar";return null}
 function readNames(){app.querySelectorAll("input[data-i]").forEach(e=>{S.names[+e.dataset.i]=e.value.trim()||COLORS[+e.dataset.i][0]})}
 function handover(i,msg,cb,night){S.cb=cb;render(`<div class="big">📱</div><h2>${pn(i)} に わたしてね</h2><p class="sub">${msg}</p><button class="btn" data-a="go">わたされたよ！</button>`,night)}
 function choose(i,head,cands,ok,night,lab){S.ch={i,head,cands,ok,sel:null,night,lab};drawChoose()}
-function drawChoose(keep){const c=S.ch;render(`${c.head}<div class="grid">${c.cands.map(j=>`<button class="pl${c.sel===j?" on":""}" data-a="sel" data-v="${j}">${c.lab?c.lab(j):pn(j)}</button>`).join("")}</div><button class="btn" data-a="ok" ${c.sel===null?"disabled":""}>${c.lab?"ここにする":"この人にする"}</button>`,c.night,keep)}
+function chooseHtml(head,cands,lab,sel){return `${head}<div class="grid">${cands.map(j=>`<button class="pl${sel===j?" on":""}" data-a="sel" data-v="${j}">${lab?lab(j):pn(j)}</button>`).join("")}</div><button class="btn" data-a="ok" ${sel==null?"disabled":""}>${lab?"ここにする":"この人にする"}</button>`}
+function drawChoose(keep){const c=S.ch;render(chooseHtml(c.head,c.cands,c.lab,c.sel),c.night,keep);if(c.night)setTall(S.tallC)}
 
 function setup(){
  while(S.names.length<COLORS.length)S.names.push(COLORS[S.names.length][0]);
@@ -102,47 +103,77 @@ function reveal(k){
 function night(){
  S.acts={};S.q=alive();S.qi=0;
  render(`<div class="big">🌙</div><h1>${S.day}日目の よる</h1><p>みんな、目を とじてね。<br>ひとりずつ スマホ（タブレット）を うけとって、じぶんの ばんに えらぼう。</p><button class="btn" data-a="turn">はじめる</button>`,true);
+ measureNight();
 }
 function nextTurn(){
  if(S.qi>=S.q.length)return dawn();
  const i=S.q[S.qi];
  handover(i,"よるの ばんだよ",()=>turn(i),true);
 }
-function turn(i){
+// よるの 画面の なかみ（ひょうじ用と、たかさを はかる用の りょうほうで つかう）
+// wpx: 2ひきめの じんろうが 見る「なかまが えらんだ人」（はかるときは かりの 人を いれる）
+function nightView(i,wpx,wbx){
  const role=S.roles[i];
  // ウサギ・キツネ・クロネコは 森を たんけん（タップの かいすうを そろえて、しょうたいが ばれないように）
  const ex="もりを たんけん！<br>いく ばしょを えらんでね";
  const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:ex,fox:ex,medium:ex}[role];
- const top=role==="medium"?mediumInfo():"";
  // イヌは じぶんと、まえの よるに まもった人を えらべない
  const lg=role==="dog"&&S.lastGuard!=null&&!S.out[S.lastGuard]?S.lastGuard:null;
  // じんろうは なかまの じんろうを えらべない
  const rb=role==="rabbit"||role==="fox"||role==="medium",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg&&!(role==="liar"&&S.roles[j]==="liar"));
  // 2ひきめの じんろうには、1ぴきめが えらんだ人を おしえる（そのままか、えらびなおして 2ひきめが さいしゅう けってい）
- const wp=role==="liar"&&S.acts.kill!==undefined?S.acts.kill:null;
- const wn=role==="liar"?wolfMates(i)+(wp!=null?`<p class="res">なかまの ${pn(S.acts.wb)} は<br><b>${pn(wp)}</b> を えらんだよ</p><p class="sub">そのままで いいなら「この人にする」。<br>ちがう人に したいなら、えらびなおしてね。<br>きみが えらんだ人に きまるよ。</p>`:""):"";
+ const wp=role!=="liar"?null:wpx!==undefined?wpx:S.acts.kill!==undefined?S.acts.kill:null,wb=wbx!==undefined?wbx:S.acts.wb;
+ const wn=role==="liar"?wolfMates(i)+(wp!=null?`<p class="res">なかまの ${pn(wb)} は<br><b>${pn(wp)}</b> を えらんだよ</p><p class="sub">そのままで いいなら「この人にする」。<br>ちがう人に したいなら、えらびなおしてね。<br>きみが えらんだ人に きまるよ。</p>`:""):"";
  const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:role==="owl"?owlLog():rb?`<p class="sub">たんけんは ゲームの かちまけには かんけい ないよ。<br>森の アイテムを あつめてみよう！</p>${itemLog(i)}`:wn;
- choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2>${top}<p>${msg}</p>${note}`,cands,j=>{
-  if(role==="liar"){S.acts.kill=j;S.acts.wb=i}
-  if(role==="dog"){S.acts.guard=j;S.lastGuard=j}
-  if(role==="owl")S.owlLog.push({d:S.day,j,w:S.roles[j]==="liar"});
-  const f=rb?PLACES[j]:null,it=rb?f[2][Math.floor(Math.random()*3)]:null;
-  if(rb)(S.items[i]=S.items[i]||[]).push({d:S.day,p:f[0],it});
-  const res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${it}</b> を 見つけたよ！</p>`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 じんろうだ！":"✨ じんろうじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
-  render(`<h2>${pn(i)}</h2>${res}<button class="btn" data-a="done">かくして つぎの人へ</button>`,true);
- },true,rb?j=>PLACES[j][0]+" "+PLACES[j][1]:null);
- if(wp!=null){S.ch.sel=wp;drawChoose(true)}
+ return {role,rb,cands,wp,head:`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>${note}`,lab:rb?j=>PLACES[j][0]+" "+PLACES[j][1]:null}}
+// けっかの 画面（it: 見つけた アイテム。preview の ときは きろくを のこさない）
+function resultHtml(i,j,it,preview){
+ const role=S.roles[i],rb=role==="rabbit"||role==="fox"||role==="medium",f=rb?PLACES[j]:null;
+ // クロネコは、さがす画面は ウサギと おなじ。れいばいの けっかは さいごの 画面で 見せる
+ const res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${it}</b> を 見つけたよ！</p>${role==="medium"?mediumInfo(preview):""}`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 じんろうだ！":"✨ じんろうじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
+ return `<h2>${pn(i)}</h2>${res}<button class="btn" data-a="done">かくして つぎの人へ</button>`}
+function turn(i){
+ const v=nightView(i);
+ choose(i,v.head,v.cands,j=>{
+  if(v.role==="liar"){S.acts.kill=j;S.acts.wb=i}
+  if(v.role==="dog"){S.acts.guard=j;S.lastGuard=j}
+  if(v.role==="owl")S.owlLog.push({d:S.day,j,w:S.roles[j]==="liar"});
+  const it=v.rb?PLACES[j][2][Math.floor(Math.random()*3)]:null;
+  if(v.rb)(S.items[i]=S.items[i]||[]).push({d:S.day,p:PLACES[j][0],it});
+  render(resultHtml(i,j,it),true);setTall(S.tallR);
+ },true,v.lab);
+ if(v.wp!=null){S.ch.sel=v.wp;drawChoose(true)}
 }
+// よるの はじめに、こんやの ばんの 人 ぜんいんの「えらぶ画面」と「けっかの画面」を 見えない うちに 作って たかさを はかる。
+// えらびかたで ながさが かわる ところは、いちばん ながく なる ばあいで はかる。
+// その よるは、ぜんいんの 画面を いちばん ながい 画面に そろえる（スクロールの あるなしや 量で しょうたいが ばれないように）。
+function measureNight(){
+ const keepH=app.innerHTML,keepC=app.className;
+ app.style.minHeight="0px";app.className="p0";
+ const pad=parseFloat(getComputedStyle(app).paddingBottom),H=h=>{app.innerHTML=h;return app.offsetHeight-pad};
+ let mc=0,mr=0;
+ S.q.forEach((i,qi)=>{
+  const role=S.roles[i];
+  const mate=role==="liar"?S.q.slice(0,qi).find(j=>S.roles[j]==="liar"):undefined; // さきに ばんが くる なかまの じんろう
+  const views=mate!==undefined?nightView(i,null).cands.map(c=>nightView(i,c,mate)):[nightView(i)];
+  views.forEach(v=>mc=Math.max(mc,H(chooseHtml(v.head,v.cands,v.lab,null))));
+  const v=views[0];
+  v.cands.forEach(j=>(v.rb?PLACES[j][2]:[null]).forEach(it=>mr=Math.max(mr,H(resultHtml(i,j,it,true)))));
+ });
+ S.tallC=mc;S.tallR=mr;
+ app.innerHTML=keepH;app.className=keepC;app.style.minHeight="";
+}
+function setTall(c){if(!c)return;const pb=parseFloat(getComputedStyle(app).paddingBottom);app.style.minHeight=`max(${Math.ceil(c+pb)}px, calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)))`}
 // じんろうの なかま（じぶん いがいの じんろう）。いなくなった なかまは とりけし線
 function wolfMates(i,big){
  const m=[...Array(S.n).keys()].filter(j=>j!==i&&S.roles[j]==="liar");if(!m.length)return"";
  const ns=m.map(j=>S.out[j]?`<span class="gone">${pn(j)}</span>`:pn(j)).join("　");
  return big?`<p class="res">🐺 なかまの じんろうは<br><b>${ns}</b></p>`:`<p class="sub">🐺 なかまの じんろう：${ns}</p>`}
-// れいばいクロネコ: その日の とうひょうで 森を はなれた人が じんろうだったかを しる（このあと 森の たんけんも する）
-function mediumInfo(){
+// れいばいクロネコ: その日の とうひょうで 森を はなれた人が じんろうだったかを しる（たんけんの あとの 画面で 見せる）
+function mediumInfo(preview){
  const v=S.voted;
- if(v&&!S.medLog.some(x=>x.d===v.d))S.medLog.push({d:v.d,j:v.j,w:S.roles[v.j]==="liar"});
- const now=v&&S.medLog.find(x=>x.d===v.d),past=S.medLog.filter(x=>x!==now);
+ if(!preview&&v&&!S.medLog.some(x=>x.d===v.d))S.medLog.push({d:v.d,j:v.j,w:S.roles[v.j]==="liar"});
+ const now=v&&(S.medLog.find(x=>x.d===v.d)||{d:v.d,j:v.j,w:S.roles[v.j]==="liar"}),past=S.medLog.filter(x=>x.d!==(v&&v.d));
  const res=now?`<p class="res">きょう 森を はなれた<br>${pn(now.j)} は…<br><b>${now.w?"🐺 じんろうだった！":"✨ じんろうじゃなかったよ"}</b></p>`:`<p class="res">きょうは まだ だれも 森を はなれていないよ</p>`;
  const log=past.length?`<div class="card"><p class="sub">これまでに わかったこと</p>${past.map(x=>`<div class="row"><span><small class="sub">${x.d}日目に はなれた</small><br>${pn(x.j)}</span><b>${x.w?"🐺 じんろう":"✨ じんろうじゃない"}</b></div>`).join("")}</div>`:"";
  return res+log}
