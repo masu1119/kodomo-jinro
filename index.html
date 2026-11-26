@@ -197,8 +197,7 @@ function roster(){
  S.out.forEach((o,i)=>{if(o)w[S.why[i]]++});
  const rl=["liar","fox","owl","dog","medium","rabbit"].filter(r=>c[r]).map(r=>`<span class="chip">${ROLES[r].e} ${ROLES[r].n} ×${c[r]}</span>`).join("");
  const ps=[...Array(S.n).keys()].map(i=>S.out[i]?`<span class="gone">${pn(i)}</span>`:`<span>${pn(i)}</span>`).join("");
- const a=alive().length;
- const dec=S.day>1?`<p class="res">はじめは ${S.n}人 → いまは ${a}人<br>${S.n-a}人 へったよ</p><p class="sub">へった人の やくわりは ひみつだよ</p>`:"";
+ const dec=S.day>1?`<p class="sub">へった人の やくわりは ひみつだよ</p>`:"";
  return `<div class="card"><p class="sub">この ゲームの やくわり（ぜんぶで ${S.n}人）</p><div class="chips">${rl}</div><p class="sub">のこっている人</p><div class="plist">${ps}</div>${dec}</div>`}
 function dayIntro(){render(`<div class="big">☀️</div><h1>${S.day}日目の ひる</h1><p>みんなで あつまってね。</p><button class="btn" data-a="discuss">はなしあいを はじめる</button>`)}
 function discuss(){
