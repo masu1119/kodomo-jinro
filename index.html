@@ -89,7 +89,8 @@ function setup(){
 }
 function startGame(){
  readNames();
- const r=["liar","owl"];if(S.n>=6)r.push("dog");if(S.n>=7)r.push("fox");while(r.length<S.n)r.push("rabbit");
+ // おすすめ: 8人から オオカミ2ひき。キツネは 7人と 9人（8人は なし）
+ const r=["liar","owl"];if(S.n>=8)r.push("liar");if(S.n>=6)r.push("dog");if(S.n===7||S.n>=9)r.push("fox");while(r.length<S.n)r.push("rabbit");
  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}
  S.roles=r;S.out=[];S.why=[];S.day=1;S.lastGuard=null;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];S.owlLog=[{d:0,j:S.hint,w:false}];S.items={};reveal(0);
 }
@@ -111,10 +112,14 @@ function turn(i){
  const msg={liar:"たべる人を えらんでね",owl:"しらべる人を えらんでね",dog:"まもる人を えらんでね",rabbit:"もりを たんけん！<br>いく ばしょを えらんでね",fox:"もりを たんけん！<br>いく ばしょを えらんでね"}[role];
  // イヌは じぶんと、まえの よるに まもった人を えらべない
  const lg=role==="dog"&&S.lastGuard!=null&&!S.out[S.lastGuard]?S.lastGuard:null;
- const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg);
- const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:role==="owl"?owlLog():rb?`<p class="sub">たんけんは ゲームの かちまけには かんけい ないよ。<br>森の アイテムを あつめてみよう！</p>${itemLog(i)}`:"";
+ // オオカミは なかまの オオカミを えらべない
+ const rb=role==="rabbit"||role==="fox",cands=rb?[0,1,2,3]:alive().filter(j=>j!==i&&j!==lg&&!(role==="liar"&&S.roles[j]==="liar"));
+ // 2ひきめの オオカミには、1ぴきめが えらんだ人を おしえる（そのままか、えらびなおして 2ひきめが さいしゅう けってい）
+ const wp=role==="liar"&&S.acts.kill!==undefined?S.acts.kill:null;
+ const wn=role==="liar"?wolfMates(i)+(wp!=null?`<p class="res">なかまの ${pn(S.acts.wb)} は<br><b>${pn(wp)}</b> を えらんだよ</p><p class="sub">そのままで いいなら「この人にする」。<br>ちがう人に したいなら、えらびなおしてね。<br>きみが えらんだ人に きまるよ。</p>`:""):"";
+ const note=lg!=null?`<p class="sub">${pn(lg)} は きのう まもったので、きょうは まもれないよ</p>`:role==="owl"?owlLog():rb?`<p class="sub">たんけんは ゲームの かちまけには かんけい ないよ。<br>森の アイテムを あつめてみよう！</p>${itemLog(i)}`:wn;
  choose(i,`<div class="big">${ROLES[role].e}</div><h2>${pn(i)}</h2><p>${msg}</p>${note}`,cands,j=>{
-  if(role==="liar")S.acts.kill=j;
+  if(role==="liar"){S.acts.kill=j;S.acts.wb=i}
   if(role==="dog"){S.acts.guard=j;S.lastGuard=j}
   if(role==="owl")S.owlLog.push({d:S.day,j,w:S.roles[j]==="liar"});
   const f=rb?PLACES[j]:null,it=rb?f[2][Math.floor(Math.random()*3)]:null;
@@ -122,7 +127,13 @@ function turn(i){
   const res=rb?`<p class="res">${f[0]} ${f[1]}で<br><b>${it}</b> を 見つけたよ！</p>`:role==="owl"?`<p class="res">${pn(j)} は…<br><b>${S.roles[j]==="liar"?"🐺 オオカミだ！":"✨ オオカミじゃないよ"}</b></p>`:`<p class="res">えらんだよ！</p>`;
   render(`<h2>${pn(i)}</h2>${res}<button class="btn" data-a="done">かくして つぎの人へ</button>`,true);
  },true,rb?j=>PLACES[j][0]+" "+PLACES[j][1]:null);
+ if(wp!=null){S.ch.sel=wp;drawChoose(true)}
 }
+// オオカミの なかま（じぶん いがいの オオカミ）。いなくなった なかまは とりけし線
+function wolfMates(i,big){
+ const m=[...Array(S.n).keys()].filter(j=>j!==i&&S.roles[j]==="liar");if(!m.length)return"";
+ const ns=m.map(j=>S.out[j]?`<span class="gone">${pn(j)}</span>`:pn(j)).join("　");
+ return big?`<p class="res">🐺 なかまの オオカミは<br><b>${ns}</b></p>`:`<p class="sub">🐺 なかまの オオカミ：${ns}</p>`}
 // フクロウが これまでに しらべた けっか（はじめの ヒントも ふくむ）
 function owlLog(){
  if(!S.owlLog||!S.owlLog.length)return"";
@@ -185,7 +196,7 @@ const act={
  inc:()=>{readNames();if(S.n<COLORS.length)S.n++;setup()},
  dec:()=>{readNames();if(S.n>4)S.n--;setup()},
  start:startGame,top:()=>{clearInterval(S.tm);setup()},
- peek:()=>{const k=S.k,r=ROLES[S.roles[k]],h=S.roles[k]==="owl"?`<p class="res">${pn(S.hint)} は…<br><b>✨ オオカミじゃないよ</b></p>`:"";// x: その やくわりが ゲームに いるときだけ つけたす せつめい
+ peek:()=>{const k=S.k,r=ROLES[S.roles[k]],h=S.roles[k]==="owl"?`<p class="res">${pn(S.hint)} は…<br><b>✨ オオカミじゃないよ</b></p>`:S.roles[k]==="liar"?wolfMates(k,true):"";// x: その やくわりが ゲームに いるときだけ つけたす せつめい
   const x=Object.entries(r.x||{}).filter(([k])=>S.roles.includes(k)).map(([,t])=>t).join("");
   render(`<div class="big">${r.e}</div><h2>${r.n}</h2><p>${r.d}${x}</p>${h}<button class="btn" data-a="hide">かくして つぎの人へ</button>`)},
  hide:()=>reveal(S.k+1),
