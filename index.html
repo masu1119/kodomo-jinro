@@ -91,9 +91,9 @@ function setup(){
 }
 function startGame(){
  readNames();
- // おすすめ: 8人から じんろう2ひき。キツネは 7人と 9人（8人は なし）
- // イヌは 4人と 6人いじょう（4人で 1日目の とうひょうを はずしても、イヌが まもれば 2日目に すすめる。5人は ほりゅう）
- const r=["liar","owl"];if(S.n>=8)r.push("liar");if(S.n===4||S.n>=6)r.push("dog");if(S.n===7||S.n>=9)r.push("fox");if(S.n>=8)r.push("medium");while(r.length<S.n)r.push("rabbit");
+ // おすすめ: 8人から じんろう2ひき。イヌは いつも いる。キツネは 5人・7人・9人（4人・6人・8人は なし）
+ // 5人は 🐺🦉🐶🦊🐰（キツネで じんろうがわが つよく なるぶん、イヌで むらびとがわも つよく する）
+ const r=["liar","owl"];if(S.n>=8)r.push("liar");r.push("dog");if(S.n===5||S.n===7||S.n>=9)r.push("fox");if(S.n>=8)r.push("medium");while(r.length<S.n)r.push("rabbit");
  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}
  S.roles=r;S.out=[];S.why=[];S.day=1;S.lastGuard=null;const oi=r.indexOf("owl"),c=[...Array(S.n).keys()].filter(i=>i!==oi&&r[i]!=="liar");S.hint=c[Math.floor(Math.random()*c.length)];S.owlLog=[{d:0,j:S.hint,w:false}];S.medLog=[];S.voted=null;S.items={};reveal(0);
 }
